@@ -114,7 +114,7 @@ class CaptureManager:
                 image = frame
                 break
         
-        
+
         output = get_response(analyze_image(image))
         
         # output = get_response(sentiment)
@@ -124,8 +124,15 @@ class CaptureManager:
         st.title(sentiment)
         # print("sentiment seen:",sentiment)
         # print("myoutput", output)
-
+        with open("data.txt", "w") as f:
+            if sentiment != "invalid, sensor error":
+                f.write(str(self.convert_sentiment_to_int(sentiment)))
+        
         self.dynamic_markdown.markdown(output)
+    
+    def convert_sentiment_to_int(self, sentiment):
+        return ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"].index(sentiment)
+
     
 
 manager = CaptureManager()
