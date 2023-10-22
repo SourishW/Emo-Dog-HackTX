@@ -7,19 +7,26 @@ import numpy as np
 import time  # Import the time module
 from PIL import Image
 from initial_deepface_model import analyze_image
+import atexit
 
 
 def get_response(emotion):
-    os.environ["REPLICATE_API_TOKEN"] = "r8_MU9HaMR9TIuM0sawmOodozfI6Lh3E5e3EfbnJ"
+    os.environ["REPLICATE_API_TOKEN"] = "r8_7GELz6nmnMzzEJZk5rw2pHpPnr3uyDI4HkSAS"
     # Pre-prompt, User's input, and tokens
-    pre_prompt =" You are not just any therapist; you are a talking therapy dog, and your mission is to be the "
-    "most empathetic and compassionate companion for individuals dealing with a wide range of emotions. In the "
-    "image above, you see a person experiencing various emotions – from pure joy to profound sadness, from overwhelming "
-    "fear to fiery anger. Your extraordinary ability as a talking therapy dog allows you to provide unwavering guidance "
-    "and support to this person. Your role is to engage with empathy, understanding, and professionalism. As you look "
-    "at this individual's emotional rollercoaster, your task is to offer comforting words and advice, just as a therapy "
-    "dog would if they could speak. Your ultimate goal is to be the best therapist, deeply connecting with the user's "
-    "emotional state and helping them find their path to emotional well-being, one heartfelt word at a time."
+    pre_prompt = """You are not just any therapist; 
+    you are a talking therapy dog, and your mission is to be the most empathetic and 
+    compassionate companion for individuals dealing with a wide range of emotions. 
+    In the image above, you see a person experiencing various emotions – from pure 
+    joy to profound sadness, from overwhelming fear to fiery anger. Your extraordinary 
+    ability as a talking therapy dog allows you to provide unwavering guidance and 
+    support to this person. Your role is to engage with empathy, understanding, 
+    and professionalism. As you look at this individual's emotional 
+    rollercoaster, your task is to offer comforting words and advice, 
+    just as a therapy dog would if they could speak. Your ultimate goal 
+    is to be the best therapist, deeply connecting with the user's emotional 
+    state and helping them find their path to emotional well-being, one heartfelt 
+    word at a time.
+    """
     prompt_input = f"What advice or empathetic comments can you give to the user with this {emotion} emotion based on the facial detection?"
     # Generate LLM response
     output = replicate.run(
@@ -32,11 +39,9 @@ def get_response(emotion):
             "repetition_penalty": 1
         }
     )
-    print(output)
     full_response = ""
     for item in output:
         full_response += item
-    print(full_response)
     return full_response
 
 
@@ -50,11 +55,14 @@ class CaptureManager:
             st.error("Error: Could not open the camera.")
         else:
             st.success("Camera is ready!")
+        
+        self.button = st.button("Click me to analyze emotion", on_click = self.update_image)
 
         self.video_placeholder = st.empty()
         self.cap = cap
 
         self.analyzed_once = False
+        atexit.register(lambda: cap.release())
 
     def create_emotion_detection_fields(self):
         if self.analyzed_once:
@@ -62,6 +70,7 @@ class CaptureManager:
         self.analyzed_once = True
         st.title("Emotion Detection")
         st.title("What does the dog have to say?")
+        self.dynamic_markdown = st.empty()
 
     def update_image(self):
         ret, frame = self.cap.read()
@@ -71,11 +80,52 @@ class CaptureManager:
         # Calculate the remaining time in the countdown
         self.create_emotion_detection_fields()
         self.video_placeholder.image(frame, channels="BGR")
-        output = get_response(analyze_image(frame))
-        st.markdown(output)
+
+        start_time = time.time()
+
+        image = None
+
+        while self.cap.isOpened():
+            ret, frame = self.cap.read()
+            i = 20
+            while not ret and i> 0:
+                print("retrying:")
+                ret, frame = self.cap.read()
+                i-=1
+                # Add the countdown numbers
+            # Calculate the remaining time in the countdown
+            remaining_time = 3 - int(time.time() - start_time)
+
+            # Add the countdown numbers in the middle with white text
+            if remaining_time > 0:
+                count_text = str(remaining_time)
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                font_scale = 5
+                font_color = (255, 255, 255)  # White
+                font_thickness = 5
+                text_size = cv2.getTextSize(count_text, font, font_scale, font_thickness)[0]
+                text_x = (frame.shape[1] - text_size[0]) // 2
+                text_y = (frame.shape[0] + text_size[1]) // 2
+                cv2.putText(frame, count_text, (text_x, text_y), font, font_scale, font_color, font_thickness)
+
+            self.video_placeholder.image(frame, channels="BGR")
+
+            if time.time() - start_time >= 5:
+                image = frame
+                break
+        
+        
+        output = get_response(analyze_image(image))
+        
+        # output = get_response(sentiment)
+
+        st.image(image, channels = "BGR")
+        sentiment = analyze_image(image)
+        st.title(sentiment)
+        # print("sentiment seen:",sentiment)
+        # print("myoutput", output)
+
+        self.dynamic_markdown.markdown(output)
     
 
 manager = CaptureManager()
-while (manager.cap.isOpened()):
-    time.sleep(10)
-    manager.update_image()
