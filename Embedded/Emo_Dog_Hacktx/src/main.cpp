@@ -71,6 +71,25 @@ void actions(int val){
     {
     case ANGRY_INDEX:
       for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+        switch (i)
+      {
+      case 0:
+        tft.draw16BitBitmap(40,40,surprisedEye,80,80);
+        tft.draw16BitBitmap(40+200,40,surprisedEye,80,80);
+        tft.draw16BitBitmap(75,160,disgustMouth,170,60);
+        doggo.setSpeed(-64);
+        break;
+      case 1:
+        tft.draw16BitBitmap(40,40,surprisedEye,80,80);
+        tft.draw16BitBitmap(40+200,40,surprisedEye,80,80);
+        tft.draw16BitBitmap(75,160,surprisedMouth,170,60);
+        doggo.setSpeed(0);
+        break;
+      
+      default:
+      doggo.setSpeed(0);
+        break;
+      }
       delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
     }
       break;
@@ -78,11 +97,49 @@ void actions(int val){
     case DISGUST_INDEX:
     for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
       delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
+      switch (i)
+      {
+      case 0:
+        tft.draw16BitBitmap(40,40,blankEye,80,80);
+        tft.draw16BitBitmap(40+200,40,blankEye,80,80);
+        tft.draw16BitBitmap(75,160,disgustMouth,170,60);
+        doggo.setSpeed(-64);
+        break;
+      case 1:
+        tft.draw16BitBitmap(40,40,blankEye,80,80);
+        tft.draw16BitBitmap(40+200,40,blankEye,80,80);
+        tft.draw16BitBitmap(75,160,neutralMouth,170,60);
+        doggo.setSpeed(0);
+        break;
+      
+      default:
+      doggo.setSpeed(0);
+        break;
+      }
     }
       break;
 
     case FEAR_INDEX:
       for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+        switch (i%2)
+      {
+      case 0:
+        tft.draw16BitBitmap(40,40,surprisedEye,80,80);
+        tft.draw16BitBitmap(40+200,40,surprisedEye,80,80);
+        tft.draw16BitBitmap(75,160,surprisedMouth,170,60);
+        doggo.setSpeed(-64);
+        break;
+      case 1:
+        tft.draw16BitBitmap(40,40,surprisedEye,80,80);
+        tft.draw16BitBitmap(40+200,40,surprisedEye,80,80);
+        tft.draw16BitBitmap(75,160,disgustMouth,170,60);
+        doggo.setSpeed(64);
+        break;
+      
+      default:
+      doggo.setSpeed(0);
+        break;
+      }
       delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
     }
       break;
@@ -114,16 +171,57 @@ void actions(int val){
     case SAD_INDEX:
       doggo.setSpeed(0);
       for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+        switch (i)
+      {
+      case 0:
+        tft.draw16BitBitmap(40,40,happyEyeLeft,80,80);
+        tft.draw16BitBitmap(40+200,40,blankEye,80,80);
+        tft.draw16BitBitmap(75,160,disgustMouth,170,60);
+        doggo.setSpeed(64);
+        break;
+      case 1:
+        tft.draw16BitBitmap(40,40,blankEye,80,80);
+        tft.draw16BitBitmap(40+200,40,happyEyeRight,80,80);
+        tft.draw16BitBitmap(75,160,surprisedMouth,170,60);
+        doggo.setSpeed(-64);
+        break;
+      default:
+      doggo.setSpeed(0);
+        break;
+      }
       delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
     }
       break;
     case SURPRISE_INDEX:
     for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+      switch (i%2)
+      {
+      case 0:
+        tft.draw16BitBitmap(40,40,surprisedEye,80,80);
+        tft.draw16BitBitmap(40+200,40,happyEyeRight,80,80);
+        tft.draw16BitBitmap(75,160,surprisedMouth,170,60);
+
+        doggo.setSpeed(64);
+        break;
+      case 1:
+        tft.draw16BitBitmap(40,40,happyEyeRight,80,80);
+        tft.draw16BitBitmap(40+200,40,surprisedEye,80,80);
+        tft.draw16BitBitmap(75,160,surprisedMouth,170,60);
+        doggo.setSpeed(-64);
+        break;
+      default:
+      doggo.setSpeed(0);
+        break;
+      }
       delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
     }
       break;
     case NEUTRAL_INDEX:
     for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+        tft.draw16BitBitmap(40,40,blankEye,80,80);
+        tft.draw16BitBitmap(40+200,40,blankEye,80,80);
+        tft.draw16BitBitmap(75,160,neutralMouth,170,60);
+      
       delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
     }
       break;
@@ -131,6 +229,7 @@ void actions(int val){
     default:
       Serial.printf("%d\n", val);
       for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+        
       delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
     }
       break;
