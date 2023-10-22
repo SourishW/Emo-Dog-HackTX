@@ -5,58 +5,153 @@
 #include <HTTPClient.h>
 #include "images.h"
 #include "Movement.h"
+#include <esp_timer.h>
 
+void actions(int);
+void displayTests(void);
 TFT_eSPI tft;
-char* ssid = "emodog";
-char* pass = "abcd1234$";
-String serverName = "http://192.168.137.207:8080/";
+char* ssid = "HowWasYourDayToday";
+char* pass = "9563987865";
+String serverName = "http://192.168.50.158:8080/";
 String serverPath;
 String payload;
 Vehicle doggo;
+#define BEHAVIORS_PER_EMOTION 5
+#define NEW_DATA_PERIOD_S 5 // in seconds 
+
 void setup() {
   Serial.begin(115200);
   Serial.println("Serial Initialized");
+  Serial.println("Initializing Display ...");
   tft.begin();
-  tft.setRotation(1);
-  tft.fillScreen(ILI9341_CYAN);
-  Serial.println("Should be Cyan");
+  tft.fillScreen(ILI9341_WHITE);
+  tft.setRotation(3);
+  Serial.println("Display Initialized");
   Serial.printf("Connecting to WiFi network %s\n", ssid);
-  doggo.init();
   WiFi.begin(ssid, pass);
   while(WiFi.status()!=WL_CONNECTED);
   Serial.println("Connection Successful");
-  // tft.draw16BitBitmap(0,0,happy_pug, 306,204);
-  tft.fillRect(20+20,40,80,80,ILI9341_DARKGREY);
-  tft.fillRect(200,40,80,80,ILI9341_DARKGREY);
-  tft.fillRect(80-5,140+20,120+20+20+10,60, ILI9341_RED);
-  Serial.println("Printed test BMP");
-  // tft.fillRect(0,0, 50,100,ILI9341_DARKGREEN);
+  Serial.println("Initializing Motors");
+  doggo.init();
+  doggo.setSpeed(0);
+  Serial.println("Initalized Motors");
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  // displayTests();
   if(WiFi.status()==WL_CONNECTED){
+    Serial.println("Connecting to HTTP Server");
     HTTPClient http;
     serverPath = serverName; // add the path if needed
     http.begin(serverPath);
     int http_response = http.GET();
-    Serial.printf("HTTP RESPONSE: %d\n", http_response);
     if(http_response > 0){
-      Serial.println("HTTP RESPONSE: ");
-      Serial.println(http_response);
+      Serial.println("HTTP Get successful");
       String payload = http.getString();
       Serial.println(payload);
+      actions(payload.c_str()[0]-'0');
     }else{
-
+      Serial.printf("HTTP Response: %d\n", http_response);
     }
-
     http.end();
-    delay(5000);
-
-  }else{
-    Serial.printf("Status :%d\n", WiFi.status());
   }
-  
-
 
 }
+// ["angry", "disgust", "fear", "happy", "sad", "surprise", "neutral"
+#define ANGRY_INDEX 0
+#define DISGUST_INDEX 1
+#define FEAR_INDEX 2
+#define HAPPY_INDEX 3
+#define SAD_INDEX 4
+#define SURPRISE_INDEX 5
+#define NEUTRAL_INDEX 6
+void actions(int val){
+    switch (val)
+    {
+    case ANGRY_INDEX:
+      for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+      delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
+    }
+      break;
+    
+    case DISGUST_INDEX:
+    for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+      delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
+    }
+      break;
+
+    case FEAR_INDEX:
+      for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+      delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
+    }
+      break;
+
+    case HAPPY_INDEX:
+    for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+      switch (i)
+      {
+      case 0:
+        tft.draw16BitBitmap(40,40,happyEyeLeft,80,80);
+        tft.draw16BitBitmap(40+200,40,happyEyeRight,80,80);
+        tft.draw16BitBitmap(75,160,surprisedMouth,170,60);
+        doggo.setSpeed(64);
+        break;
+      case 1:
+        tft.draw16BitBitmap(40,40,surprisedEye,80,80);
+        tft.draw16BitBitmap(40+200,40,surprisedEye,80,80);
+        tft.draw16BitBitmap(75,160,surprisedMouth,170,60);
+        doggo.setSpeed(-64);
+        break;
+      default:
+      doggo.setSpeed(0);
+        break;
+      }
+      delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
+    }
+      break;
+
+    case SAD_INDEX:
+      doggo.setSpeed(0);
+      for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+      delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
+    }
+      break;
+    case SURPRISE_INDEX:
+    for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+      delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
+    }
+      break;
+    case NEUTRAL_INDEX:
+    for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+      delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
+    }
+      break;
+
+    default:
+      Serial.printf("%d\n", val);
+      for ( int i = 0 ; i < BEHAVIORS_PER_EMOTION ; i++){
+      delayMicroseconds(NEW_DATA_PERIOD_S*1000000/BEHAVIORS_PER_EMOTION);
+    }
+      break;
+    }
+}
+
+void displayTests(){
+  while(1){
+    tft.draw16BitBitmap(40,40,blankEye,80,80);
+    tft.draw16BitBitmap(40+200,40,blankEye,80,80);
+    tft.draw16BitBitmap(75,160,disgustMouth,170,60);
+    delay(3000);
+    tft.draw16BitBitmap(40,40,happyEyeLeft,80,80);
+    tft.draw16BitBitmap(40+200,40,happyEyeRight,80,80);
+    tft.draw16BitBitmap(75,160,neutralMouth,170,60);
+    delay(3000);
+    tft.draw16BitBitmap(40,40,surprisedEye,80,80);
+    tft.draw16BitBitmap(40+200,40,surprisedEye,80,80);
+    tft.draw16BitBitmap(75,160,surprisedMouth,170,60);
+    delay(3000);
+  }
+}
+
+

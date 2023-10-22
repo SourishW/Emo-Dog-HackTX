@@ -1,5 +1,6 @@
 #include "Movement.h"
 #include <esp32-hal-ledc.h>
+#include <esp_timer.h>
 #include <Arduino.h>
 
 // hw_timer_t* pwm_updater = NULL;
@@ -24,13 +25,14 @@ void Vehicle::init(){
     digitalWrite(MOTOR_CIN2, LOW);
     ledcWrite(MOTOR_A_LEDC_CHAN, 0);
     ledcWrite(MOTOR_C_LEDC_CHAN, 0);
+    
     // pwm_updater = timerBegin(0, 80, true);
     // val = this;
 }
 
 void Vehicle::setSpeed(int desired){
-    current_speed = desired_speed;
-    if(desired_speed > 0){
+    current_speed = desired;
+    if(current_speed > 0){
         digitalWrite(MOTOR_AIN1, HIGH);
         digitalWrite(MOTOR_AIN2, LOW);
         digitalWrite(MOTOR_CIN1, HIGH);
@@ -41,8 +43,8 @@ void Vehicle::setSpeed(int desired){
         digitalWrite(MOTOR_CIN1, LOW);
         digitalWrite(MOTOR_CIN2, HIGH);
     }
-    ledcWrite(MOTOR_A_LEDC_CHAN, desired%128);
-    ledcWrite(MOTOR_C_LEDC_CHAN, desired_speed%128);
+    ledcWrite(MOTOR_A_LEDC_CHAN, current_speed%128);
+    ledcWrite(MOTOR_C_LEDC_CHAN, current_speed%128);
 }
 
 int Vehicle::getSpeed(){
@@ -51,19 +53,19 @@ int Vehicle::getSpeed(){
 
 void Vehicle::turnRight(int turnSpeed){
     current_speed = turnSpeed;
-    if(desired_speed > 0){
+    if(current_speed > 0){
         digitalWrite(MOTOR_AIN1, HIGH);
         digitalWrite(MOTOR_AIN2, LOW);
-        digitalWrite(MOTOR_CIN1, LOW);
-        digitalWrite(MOTOR_CIN2, HIGH);
+        digitalWrite(MOTOR_CIN1, HIGH);
+        digitalWrite(MOTOR_CIN2, LOW);
     }else{
-        digitalWrite(MOTOR_AIN1, LOW);
-        digitalWrite(MOTOR_AIN2, HIGH);
+        digitalWrite(MOTOR_AIN1, HIGH);
+        digitalWrite(MOTOR_AIN2, LOW);
         digitalWrite(MOTOR_CIN1, HIGH);
         digitalWrite(MOTOR_CIN2, LOW);
     }
-    ledcWrite(MOTOR_A_LEDC_CHAN, turnSpeed%128);
-    ledcWrite(MOTOR_C_LEDC_CHAN, turnSpeed%128);
+    ledcWrite(MOTOR_A_LEDC_CHAN, turnSpeed%256);
+    ledcWrite(MOTOR_C_LEDC_CHAN, ((turnSpeed)>>2)%256);
 }
 
 void Vehicle::turnLeft(int turnSpeed){
@@ -87,6 +89,6 @@ void Vehicle::turnLeftBackwards(int turnSpeed){
     
 }
 
-void Vehicle::turnLeftBackwards(int turnSpeed){
+void Vehicle::turnRightBackwards(int turnSpeed){
     
 }
