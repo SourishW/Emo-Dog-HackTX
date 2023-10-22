@@ -4,13 +4,15 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include "images.h"
+#include "Movement.h"
+
 TFT_eSPI tft;
-char* ssid = "Use mobile hotspot";
-char* pass = "Use mobile hotspot";
-String serverName = "Enter here";
+char* ssid = "emodog";
+char* pass = "abcd1234$";
+String serverName = "http://192.168.137.207:8080/";
 String serverPath;
 String payload;
-
+Vehicle doggo;
 void setup() {
   Serial.begin(115200);
   Serial.println("Serial Initialized");
@@ -19,10 +21,14 @@ void setup() {
   tft.fillScreen(ILI9341_CYAN);
   Serial.println("Should be Cyan");
   Serial.printf("Connecting to WiFi network %s\n", ssid);
+  doggo.init();
   WiFi.begin(ssid, pass);
   while(WiFi.status()!=WL_CONNECTED);
   Serial.println("Connection Successful");
-  tft.draw16BitBitmap(0,0,happy_pug, 306,204);
+  // tft.draw16BitBitmap(0,0,happy_pug, 306,204);
+  tft.fillRect(20+20,40,80,80,ILI9341_DARKGREY);
+  tft.fillRect(200,40,80,80,ILI9341_DARKGREY);
+  tft.fillRect(80-5,140+20,120+20+20+10,60, ILI9341_RED);
   Serial.println("Printed test BMP");
   // tft.fillRect(0,0, 50,100,ILI9341_DARKGREEN);
 }
