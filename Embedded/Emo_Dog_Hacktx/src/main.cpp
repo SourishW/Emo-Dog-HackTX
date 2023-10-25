@@ -10,9 +10,9 @@
 void actions(int);
 void displayTests(void);
 TFT_eSPI tft;
-char* ssid = "HowWasYourDayToday";
-char* pass = "9563987865";
-String serverName = "http://192.168.50.158:8080/";
+char* ssid = "ssid";
+char* pass = "pass";
+String serverName = "serverip";
 String serverPath;
 String payload;
 Vehicle doggo;
